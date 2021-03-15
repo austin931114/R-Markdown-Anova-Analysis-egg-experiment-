@@ -1,0 +1,173 @@
+---
+title: Case Study 3
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+    code_folding: hide
+---
+```{r include=FALSE}
+library(tidyverse)
+library(mosaic)
+library(car)
+library(pander)
+library(agricolae)
+library(qcc)
+library(emmeans)
+library(gridExtra)
+library(readr)
+library(png)
+library(grid)
+library(gplots)
+library(rmdformats)
+library(prettydoc)
+
+eggtime <- read_csv("/Users/zhangyongnan/Desktop/MATH 326/Case 3/eggtime.csv")
+eggtime$block <- factor(eggtime$block)
+eggtime$time <- factor(eggtime$time)
+
+```
+
+---
+        
+# Boiled Egg CB{1}
+
+![](egg copy.jpg)
+
+---
+
+# Introduction
+
+The egg is one of the most common ingredients in any culture. People have developed many ways to cook the egg in various forms with a different flavor. The egg has quality protein without extra fat, which is beneficial for human health, so many people use egg as their primary source of protein. While individuals have their preference for cooking an egg, a boiled egg is one of the easiest and common types of egg dishes. This experiment explores the effect of cooking time on a boiled egg. The measurement uses six scale degree of doneness. The treatment factor is cooking time. The blocking factor is the type of egg.
+
+**Response Variable:** Egg Measurement Result
+
+**Treatment Factor:** Cooking Time
+
+**Levels:** Four Minutes Cooking Time, Six Minutes Cooking Time, Eight Minutes Cooking Time
+
+**Block Factor:** Type of Egg
+
+**Level:** Large White Egg, Extra Large White Egg, Brown Egg, Cage Free Brown Egg 
+
+**Units:** 12 eggs (4 for each level of treatment, 3 for each level of block)
+
+**Research Question:** Does cooking time cause different result of cooking a boiled egg?
+
+
+### Hypothesis
+
+$Y_{ij} = \mu + \tau_i + \beta_j + \epsilon_{ij}$
+
+Cooking Time Hypothesis
+
+$H_o: \alpha_{4 minutes} = \alpha_{ 6 minutes} = \alpha_{ 8 minutes} = 0$
+
+$H_a: \alpha_i \ne 0 \text{ for at least one i } \in \text{{4 minutes, 6 minutes, 8 minutes}}$
+
+$\alpha = 0.05$
+
+Confidence intervals and post hoc analysis are also presented.
+
+----
+
+# Method (Experimental Protocal)
+
+Eliminating variables other than the cooking time of the boiled egg is critical to determine if the result of the experiment relates to these this factor. The variable includes egg type, water amount, water temperature, pot type, and measurement process. The egg type is controlled by using the same box of eggs. The water amount is controlled by making sure the water surface in the pot can cover the egg. The water temperature is controlled by using the same stove and measuring the heat with a thermometer to ensure the temperature of the water is the same, and the temperature is 100 degrees celsius. The pot type is controlled by using the same pot in each experiment. The same person controls the measurement process measures all groups using the same six levels scale. All these controls would establish the validity of the cooking time of the boiled egg and determine the effect on the boiled egg of these this variable.
+
+The twelve eggs are blocked by four different types of eggs, Large White Egg, Extra Large White Egg, Brown Egg, and Cage-Free Brown Egg, and replicate all groups twice. Then randomly assigned each group to treatment by a digital three-sided die. A roll for one assigns the egg to the treatment of four minutes of cooking time.  A roll for two assigns the egg to the treatment of six minutes cooking time. A roll for three assigns the egg to the treatment of eight minutes of cooking time. After the water in the pot achieves the desired temperature, the egg of the same treatment will put into the pot with water at the same time, then start the timer. The egg will then be taken out from the pot and put on a bowel waiting for ten minutes to break the egg. 
+
+The measurer measures the egg with the six-level scale. The number one represents the egg is raw. Number two represents the egg white is soft white, but egg yolk is raw. Number three represents the egg white, and egg yolk are both soft cooked. Number four represents the egg white is solid, but the egg yolk is still soft. Number five represents the egg white is solid, but the egg yolk is still half soft. Number six represents the egg is well-cooked, meaning that the egg white and the egg yolk are both solid.
+
+
+
+
+### Variability & Mitigation Method
+
+```{r echo=TRUE}
+cause.and.effect(cause=list(`Condition Factors`=c("Cooking Time"), `Nuisance Factors`=c("Egg Type", "Water Amount", "Water Temperature", "Pot Type", "Cooing Time"),  `Materials`=c("Egg Type"), `Measurement Process`=c("Six Level Scale")), effect="Egg Result")
+```
+                            
+
+| Source             | Mitigation
+|--------------------|-------------------
+| Cooking Time       | Treatment/ Randomized Assignment
+| Egg Type           | Control
+| Water Amount       | Control
+| Water Temperature  | Control
+| Pot Type           | Control
+| Cooking Time       | Control
+| Cooker             | Control
+| Six Level Scale    | Control
+| Cook Order         | Haphazard
+
+![](egg1.jpg) ![](egg2.jpg) ![](egg3.jpg) ![](egg4.jpg)
+
+---
+
+# Analysis
+
+The following strip chart and table present the result of the experiment. All three of the factor of interest have a different result. The factor of eight minutes has the highest result, then the factor of six minutes. The factor of four minutes is the one that has the lowest level. The mean for the factor of eight minutes is 5.75. The mean for the factor of six minutes is 4.25. The mean for the factor of four minutes is 2.25, and they all have the same standard deviation, which is 0.5.
+On the other hand, the mean for the factor of blocks shows that they have a similar result, and they do not cause different levels of doneness of the egg.
+```{r}
+par(mfrow=c(1,2))
+stripchart(result~time, data=eggtime, vertical = TRUE, pch = 16, method = "stack", main = "Effect of Time on Boiled Egg", ylab = "Egg Result")
+
+#points(1,mean(eggtime$result[eggtime$time=="six minutes"]))
+#mean(eggtime$result[eggtime$time=="six minutes"])
+
+#plotmeans(eggtime$result ~ eggtime$block,error.bars="se")
+plotmeans(eggtime$result ~ eggtime$block, main = "Block Means", xlab = "Blocks", ylab = "Results")
+pander(favstats(eggtime$result~eggtime$time, which = 1)[c(1,7,8,9)])
+
+```
+
+The following ANOVA table shows the results of the experiment. The p-value for time is 0.000422. The p-value for the block is 0.858711. As the level of significance is 0.5, the result indicates that the effect of time for the boiled egg is statistically significant, yet the block result is not significant.
+
+```{r}
+egg.aov <- aov(result ~ block + time, data = eggtime, contrasts = list(block = contr.sum, time = contr.sum))
+summary(egg.aov)
+```
+
+The following table shows the effect of the treatments. The grand mean is 4.08. The blocking effect is significantly smaller than the effect of time. The effect of the factor of eight minutes is 1.67. The effect of the factor of four minutes is -1.83. The effect of the factor of four minutes is 0.17, which is close to the mean.
+
+```{r}
+dummy.coef(egg.aov)
+```
+
+---
+
+# Diagnostics
+
+The Residuals vs. Fitted Plot shows no megaphone shape, and the standard deviations are within a factor of 3 of each other, as mentioned before. These results satisfy the requirement of constant variance. The histogram shows a fairly normal distribution for the residual. The Q-Q plot does not show a perfect line, but it is still within the limit, so we can conclude the experiment is normally distributed.
+
+```{r}
+par(mfrow=c(1,2))
+plot(egg.aov$residuals~egg.aov$fitted.values, main = "Residuals vs. Fitted", xlab = "Fitted Values", ylab = "Residuals")
+hist(egg.aov$residuals, xlab = "Residuals", main = "Histogram of Residuals")
+qqPlot(egg.aov$residuals, id = FALSE, main = "QQ Plot of Residuals", ylab = "Residuals")
+plot(egg.aov$residuals, col = eggtime$time, main = "Order Plot of Residuals", ylab = "Residuals")
+
+#leveneTest(eggtime$result,eggtime$time, center = mean)
+
+
+#plot(my.aov, which = 1)
+```
+
+
+### Pairwise Comparisons
+
+The Tukey method is used to make pairwise comparisons since the general ANOVA test shows that at least one group is different, keeping the family-wise level of significance at 0.05. The p-value of all groups is smaller than 0.5. Therefore, all the factors of interest present that they are different than other groups.
+
+```{r}
+TukeyHSD(egg.aov, "time")
+```
+---
+
+# Conclusion
+
+The result of the experiment demonstrates that there is a significant difference in the boiled egg when cooking the boiled egg in the different time frame, which are four minutes, six minutes, and eight minutes, and the egg type, the block in the experiment, does not contribute to a significant effect for the doneness of the boiled egg. This outcome can help people to find their best tastes of boiled eggs in different cooking times. The future question will be what is the best way to prepare a boiled egg, like bake, microwave, stem, and water boil.
+
+---
